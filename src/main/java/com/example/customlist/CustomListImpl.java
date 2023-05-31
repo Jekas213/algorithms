@@ -15,7 +15,7 @@ public class CustomListImpl implements CustomList {
     public Integer add(Integer item) {
         validateItem(item);
         if (size == array.length) {
-            array = Arrays.copyOf(array, (int) (array.length * 1.5 + 1));
+            grow();
         }
         array[size] = item;
         size++;
@@ -27,7 +27,7 @@ public class CustomListImpl implements CustomList {
         validateIndex(index);
         validateItem(item);
         if (size == array.length) {
-            array = Arrays.copyOf(array, (int) (array.length * 1.5 + 1));
+            grow();
         }
         System.arraycopy(array, index, array, index + 1, array.length - index);
         array[index] = item;
@@ -68,7 +68,7 @@ public class CustomListImpl implements CustomList {
     @Override
     public boolean contains(Integer item) {
         Integer[] copy = toArray();
-        insertionSort(copy);
+        quickSort(copy,0,copy.length-1);
         return binarySearch(copy, item);
     }
 
@@ -131,16 +131,34 @@ public class CustomListImpl implements CustomList {
         }
     }
 
-    private void insertionSort(Integer[] arr) {
-        for (int i = 1; i < arr.length; i++) {
-            int temp = arr[i];
-            int j = i;
-            while (j > 0 && arr[j - 1] >= temp) {
-                arr[j] = arr[j - 1];
-                j--;
-            }
-            arr[j] = temp;
+    private void quickSort(Integer[] arr, int begin, int end) {
+        if (begin < end) {
+            int partitionIndex = partition(arr, begin, end);
+
+            quickSort(arr, begin, partitionIndex - 1);
+            quickSort(arr, partitionIndex + 1, end);
         }
+    }
+
+    private int partition(Integer[] arr, int begin, int end) {
+        int pivot = arr[end];
+        int i = (begin - 1);
+
+        for (int j = begin; j < end; j++) {
+            if (arr[j] <= pivot) {
+                i++;
+
+                swapElements(arr, i, j);
+            }
+        }
+
+        swapElements(arr, i + 1, end);
+        return i + 1;
+    }
+    private void swapElements(Integer[] arr, int left, int right) {
+        int temp = arr[left];
+        arr[left] = arr[right];
+        arr[right] = temp;
     }
 
     private boolean binarySearch(Integer[] arr, int element) {
@@ -158,5 +176,9 @@ public class CustomListImpl implements CustomList {
             }
         }
         return false;
+    }
+
+    private void grow(){
+        array = Arrays.copyOf(array, (int) (array.length * 1.5 + 1));
     }
 }
